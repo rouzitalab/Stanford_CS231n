@@ -36,11 +36,12 @@ def svm_loss_naive(W, X, y, reg):
             margin = scores[j] - correct_class_score + 1 # note delta = 1
             if margin > 0:
                 loss += margin
+                dW[:, j] += X[i]
+                dW[:, y[i]] -= X[i]
 
-    # Right now the loss is a sum over all training examples, but we want it
+                # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
     loss /= num_train
-
     # Add regularization to the loss.
     loss += reg * np.sum(W * W)
 
@@ -53,9 +54,8 @@ def svm_loss_naive(W, X, y, reg):
     # code above to compute the gradient.                                       #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    dW /= num_train
+    dW += 2 * reg * W
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     
     return loss, dW
@@ -77,9 +77,13 @@ def svm_loss_vectorized(W, X, y, reg):
     # result in loss.                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    scores = X @ W
+    correct_scores = scores[range(scores.shape[0]), y]
+    margins = np.maximum(0, scores - np.reshape(correct_scores, (correct_scores.shape[0], 1)) + 1)
+    margins[range(margins.shape[0]), y] = 0
+    loss = np.sum(margins)
+    loss /= X.shape[0]
+    loss += reg * np.sum(W * W)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     #############################################################################
@@ -92,9 +96,14 @@ def svm_loss_vectorized(W, X, y, reg):
     # loss.                                                                     #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    m = margins
+    m[margins > 0] = 1
+    b = np.sum(m, axis=1)
+    b = np.reshape(b, (1, b.shape[0]))
+    m[range(y.shape[0]), y] = -b
+    dW = X.T @ m
+    dW /= X.shape[0]
+    dW += 2 * reg * W
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     return loss, dW

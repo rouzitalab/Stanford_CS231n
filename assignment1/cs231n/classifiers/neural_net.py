@@ -79,9 +79,9 @@ class TwoLayerNet(object):
         # shape (N, C).                                                             #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
-
+        hidden_layer = (X @ W1) + b1
+        out1 = np.maximum(0, hidden_layer)
+        scores = (out1 @ W2) + b2
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         # If the targets are not given then jump out, we're done
@@ -97,9 +97,12 @@ class TwoLayerNet(object):
         # classifier loss.                                                          #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
-
+        scores -= np.max(scores, axis=1, keepdims=True)
+        sum_ = np.sum(np.exp(scores), axis=1, keepdims=True)
+        out2 = np.exp(scores) / sum_
+        loss = np.sum(-np.log(out2[range(N), y]))
+        loss /= N
+        loss += reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         # Backward pass: compute gradients
