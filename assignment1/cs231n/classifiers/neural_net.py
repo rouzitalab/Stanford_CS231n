@@ -79,8 +79,8 @@ class TwoLayerNet(object):
         # shape (N, C).                                                             #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        hidden_layer = (X @ W1) + b1
-        out1 = np.maximum(0, hidden_layer)
+        h1 = (X @ W1) + b1
+        out1 = np.maximum(0, h1)
         scores = (out1 @ W2) + b2
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -113,9 +113,17 @@ class TwoLayerNet(object):
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
-
+        m = out2
+        m[range(N), y] -= 1
+        m /= N
+        grads['W2'] = out1.T @ m
+        grads['b2'] = np.sum(m, axis=0)
+        dhidden = (m @ W2.T)
+        dhidden[out1 <= 0] = 0
+        grads['W1'] = X.T @ dhidden
+        grads['b1'] = np.sum(dhidden, axis=0)
+        grads['W2'] += 2 * reg * W2
+        grads['W1'] += 2 * reg * W1
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         return loss, grads
@@ -158,9 +166,9 @@ class TwoLayerNet(object):
             # them in X_batch and y_batch respectively.                             #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-            pass
-
+            indxs = np.random.choice(num_train, batch_size, replace=True)
+            X_batch = X[indxs]
+            y_batch = y[indxs]
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             # Compute loss and gradients using the current minibatch
@@ -174,9 +182,10 @@ class TwoLayerNet(object):
             # stored in the grads dictionary defined above.                         #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-            pass
-
+            self.params['W2'] -= learning_rate * grads['W2']
+            self.params['b2'] -= learning_rate * grads['b2']
+            self.params['W1'] -= learning_rate * grads['W1']
+            self.params['b1'] -= learning_rate * grads['b1']
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             if verbose and it % 100 == 0:
@@ -220,9 +229,8 @@ class TwoLayerNet(object):
         # TODO: Implement this function; it should be VERY simple!                #
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-        pass
-
+        scores = self.loss(X, y=None)
+        y_pred = np.argmax(scores, axis=1)
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         return y_pred
