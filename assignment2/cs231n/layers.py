@@ -26,9 +26,9 @@ def affine_forward(x, w, b):
     # will need to reshape the input into rows.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    x_ = np.reshape(x, (x.shape[0], -1))
+    z = x_ @ w
+    out = z + b
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -59,9 +59,12 @@ def affine_backward(dout, cache):
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    x_ = np.reshape(x, (x.shape[0], -1))
+    db = np.sum(dout, axis=0)
+    db = db.T
+    dw = x_.T @ dout
+    dx = dout @ w.T
+    dx = np.reshape(dx, (x.shape))
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -85,9 +88,7 @@ def relu_forward(x):
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    out = np.maximum(0, x)
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -112,9 +113,8 @@ def relu_backward(dout, cache):
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    pass
-
+    mask = np.where(x > 0, 1, 0)
+    dx = dout * mask
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
